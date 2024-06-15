@@ -1,0 +1,69 @@
+services:
+    app: &app_service
+        container_name: symfony-swl
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: dev
+        image: php83-swoole
+        restart: unless-stopped
+        expose:
+            -   8000
+        environment:
+            APP_RUNTIME: "Runtime\\Swoole\\Runtime"
+            SWOOLE_HOST: '0.0.0.0'
+            SWOOLE_PORT: '8000'
+        volumes:
+            - ./:/var/www:rw
+        depends_on:
+            -   web-server
+            -   db
+            -   cache
+        networks:
+            - api-network
+    web-server:
+        container_name: nginx-swl
+        image: nginx:1.24
+        restart: unless-stopped
+        ports:
+            - "80:80"
+        volumes:
+            - ./:/var/www
+            - ./docker/nginx/:/etc/nginx/conf.d/
+            - ./ssl:/etc/nginx/ssl
+        networks:
+            - api-network
+    db:
+        container_name: postgres-swl
+        image: postgres:16
+        restart: unless-stopped
+        volumes:
+            - "database_data:/var/lib/postgresql/data/"
+        environment:
+            POSTGRES_USER: ${DB_USERNAME} # The PostgreSQL user (useful to connect to the database)
+            POSTGRES_PASSWORD: ${DB_PASSWORD} # The PostgreSQL password (useful to connect to the database)
+            POSTGRES_DB: ${DB_DATABASE} # The PostgreSQL default database (automatically created at first launch)
+        ports:
+           - "5432:5432"
+        depends_on:
+            -   cache
+        networks:
+            - api-network
+    cache:
+        container_name: redis-swl
+        image: redis:7
+        restart: unless-stopped
+        ports:
+            - "6379:6379"
+        networks:
+            - api-network
+    migrations:
+        <<: *app_service
+        container_name: migrations-swl
+        command: [ "php", "bin/console", "doctrine:migrations:migrate", "--no-interaction" ]
+        restart: no
+networks:
+    api-network:
+        driver: bridge
+volumes:
+    database_data:
