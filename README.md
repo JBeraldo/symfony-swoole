@@ -15,8 +15,8 @@
  
  - Clone the project
     ```bash
-    git clone https://github.com/JBeraldo/symfony-cs.git
-    cd symfony-cs
+    git clone https://github.com/JBeraldo/symfony-swoole.git
+    cd symfony-swoole
     ```
  - Run with make
     ```bash
