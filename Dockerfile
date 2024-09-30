@@ -1,4 +1,4 @@
-FROM php:8.3.6-cli as base
+FROM php:8.3.12-cli AS base
 
 WORKDIR var/www/
 
@@ -11,9 +11,10 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     zip \
     unzip \
-    libpq-dev
+    libpq-dev \
+    libbrotli-dev
 
-RUN pecl install -D 'enable-brotli="no"' swoole
+RUN pecl install swoole-5.1.4
 
 RUN pecl install redis
 # Install PHP extensions
@@ -23,11 +24,11 @@ RUN docker-php-ext-enable redis swoole
 
 CMD ["php", "public/index.php"]
 
-FROM base as dev
+FROM base AS dev
 
 RUN pecl install xdebug && docker-php-ext-enable xdebug
 
-FROM base as prod
+FROM base AS prod
 
 COPY ./bin /app/bin
 COPY ./config /app/config

@@ -10,4 +10,4 @@ analyze:
 refactor:
 	docker compose exec app php vendor/bin/rector
 update:
-	docker run --rm -itv $(shell pwd):/app -w /app composer:2.7.2 composer update --ignore-platform-reqs
+	docker run --rm -itv $(shell pwd):/app -w /app composer:2.7.2 composer update --ignore-platform-reqs --no-scripts
